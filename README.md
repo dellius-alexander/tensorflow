@@ -32,7 +32,7 @@ SHA256SUM="2751ab3d678ff0277ae80f9e8a74f218cfc70fe9a9cdc7bb1c137d7e47e33d53"
 # Check file has after download and 
 if [[ $(sha256sum Anaconda3-2021.05-Linux-x86_64.sh | awk '{print $1}') =~ ^(${SHA256SUM})$ ]]; then
     printf "\nFile verfication PASSED...\n\tInitializing Conda...\n"
-    # eval $(conda init &)
+    eval $(conda init &)
 else
     printf "\nFile has verification failed...\n"
 fi
@@ -72,11 +72,13 @@ Now we can move onto installing `Tensorflow`.
 
 - Open a terminal in your vscode project setup your virtual environment
     - Method 1: simple command line definition
+    
         ```bash
         # Create python virtual environment and capture the setup logs to verify all installed packages later
          conda create --prefix=${PWD}/my_venv python=3.8 anaconda tensorflow | tee ./logs/conda-venv-install.log
         ```
-    - Method 2: create an `env.yaml` file and define your python environment. It should look like this.
+
+    - Method 2: create an `env.yaml` configuration file and define your python environment. It should look like this.
     
         ```yaml
         name: my_venv
@@ -118,10 +120,10 @@ The below should be all you need to verify you installation of `TensorFlow`. If 
     print("TensorFlow version: ", tf.__version__)
     ```
 
-The above python script should return the TersonFlow version, verifying we have a stable installation.
+- The above python script should return the TersonFlow version, verifying we have a stable installation.
 
-```bash
-TensorFlow version: 2.4.1
-```
+    ```bash
+    TensorFlow version: 2.4.1
+    ```
 
 Your are now ready to start using `TensorFlow`.
