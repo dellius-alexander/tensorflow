@@ -75,7 +75,8 @@ Now we can move onto installing `Tensorflow`.
     
         ```bash
         # Create python virtual environment and capture the setup logs to verify all installed packages later
-         conda create --prefix=${PWD}/my_venv python=3.8 anaconda tensorflow | tee ./logs/conda-venv-install.log
+        conda create --prefix=${PWD}/my_venv python=3.8 \
+        anaconda tensorflow | tee ./logs/conda-venv-install.log
         ```
 
     - Method 2: create an `env.yaml` configuration file and define your python environment. It should look like this.
@@ -96,7 +97,9 @@ Now we can move onto installing `Tensorflow`.
         - Run the command to create the above python virtual environment from our `conda configuration file`
         
             ```bash
-            (base) :-$ conda env create -f tensorflow.yml | tee ./logs/conda-venv-install.log
+            # we pipe the output to enable caching of the output
+            (base) :-$ conda env create -f tensorflow.yml \
+            | tee ./logs/conda-venv-install.log
             ```
 
     - Activate/Deactivate `my_venv`:
