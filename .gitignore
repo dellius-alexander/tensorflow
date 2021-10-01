@@ -1,0 +1,8 @@
+my_venv
+.vscode
+.devcontainer
+__pycache__
+logs/
+.notes
+aclImdb**
+*.tsv
