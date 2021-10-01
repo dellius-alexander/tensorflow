@@ -74,7 +74,8 @@ Now we can move onto installing `Tensorflow`.
     - Method 1: simple command line definition
     
         ```bash
-        # Create python virtual environment and capture the setup logs to verify all installed packages later
+        # Create python virtual environment and capture the setup logs to 
+        # verify all installed packages later
         conda create --prefix=${PWD}/my_venv python=3.8 \
         anaconda tensorflow | tee ./logs/conda-venv-install.log
         ```
