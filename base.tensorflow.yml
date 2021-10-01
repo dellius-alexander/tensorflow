@@ -1,0 +1,11 @@
+# Initial configuration file
+name: ${PWD}/my_venv
+channels: 
+  - defaults
+# Dependencies
+dependencies:
+  - pip=21.0.1
+  - tensorflow=2.4.1
+  - anaconda
+# provide a directory for your new python environment
+prefix: ${PWD}/my_venv

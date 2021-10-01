@@ -53,6 +53,13 @@ Now we can move onto installing `Tensorflow`.
     - ms-vscode.cpptools
     - redhat.fabric8-analytics
 
+- Add the below settings to your `~/project_folder/.vscode/settings.json` file located in your workspace. This will tell vscode to use the virtual environment interpreter and environment to run your project scripts.
+
+    ```json
+    {
+    "python.defaultInterpreterPath": "${workspaceFolder}/my_venv/bin/python"
+    }
+    ```
 - Project Directory Structure: 
 
     You can try any tutorial when we are complete the installation but your project should at least resemble below when finished. 
@@ -110,7 +117,7 @@ Now we can move onto installing `Tensorflow`.
             ```
         - To deactivate an active environment, use
             ```bash
-            (base) (my_venv):-$ conda deactivate
+            (my_venv):-$ conda deactivate
             ```
     - To see your existing environment or verify if the new environment was created, use this command:
         ```bash
@@ -121,6 +128,15 @@ Now we can move onto installing `Tensorflow`.
         ```bash
         # The --all option helps remove all packages from the environment named env_name
         conda remove --name env_name --all
+        # or specify a directory
+        conda remove 
+        ```
+
+    - Create an requirements file of your environment, listing all packages and dependencies. Use the file to duplicate your working environment in another project if needed.
+    
+        ```bash
+        # conda env export > <environment name>.yml 
+        conda env export > tensorflow.yml 
         ```
 ## 3. Verify Tensorflow installation
 
