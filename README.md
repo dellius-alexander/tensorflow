@@ -6,7 +6,10 @@
 
 ## 1. Download and Install Anaconda
 
-The below script block will handle installing and setting up Anaconda.<br/>
+***Note: Installation instruction can be found at [Anaconda Docs](https://docs.anaconda.com/anaconda/install/linux/)***
+
+The below script block will handle installing and setting up Anaconda.
+
 You can place it in file and at the terminal type `sudo bash conda.sh`
 
 ```bash
@@ -31,8 +34,8 @@ wait $!
 SHA256SUM="2751ab3d678ff0277ae80f9e8a74f218cfc70fe9a9cdc7bb1c137d7e47e33d53"
 # Check file has after download and 
 if [[ $(sha256sum Anaconda3-2021.05-Linux-x86_64.sh | awk '{print $1}') =~ ^(${SHA256SUM})$ ]]; then
-    printf "\nFile verfication PASSED...\n\tInitializing Conda...\n"
-    eval $(conda init &)
+    printf "\nFile verfication PASSED...\n\tActivating Conda...\n"
+    source $(whereis conda | cut -d '/' -f-4 | awk '{print $2}')/bin/activate
 else
     printf "\nFile has verification failed...\n"
 fi
@@ -128,8 +131,8 @@ Now we can move onto installing `Tensorflow`.
         ```bash
         # The --all option helps remove all packages from the environment named env_name
         conda remove --name env_name --all
-        # or specify a directory
-        conda remove 
+        # or specify a directory of the installed virtual environment
+        conda remove my_venv
         ```
 
     - Create an requirements file of your environment, listing all packages and dependencies. Use the file to duplicate your working environment in another project if needed.
