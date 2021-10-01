@@ -1,3 +1,5 @@
+# word embeddings
+#####################################################################
 # This tutorial contains an introduction to word embeddings. 
 # You will train your own word embeddings using a simple Keras 
 # model for a sentiment classification task, and then visualize 
@@ -147,4 +149,5 @@ for index, word in enumerate(vocab):
 out_v.close()
 out_m.close()
 
+print("Word Embedding completed...")
 # END OF TUTORIAL

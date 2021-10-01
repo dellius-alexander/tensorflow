@@ -64,7 +64,7 @@ Now we can move onto installing `Tensorflow`.
     |
     |___my_venv # python virtual environment
     |   |
-    |   |___bin/activate # python virtual environment activation script
+    |   |___bin/python # python executable
     |
     |___tutorial.py    # some Tensorflow tutorial
     
@@ -112,6 +112,16 @@ Now we can move onto installing `Tensorflow`.
             ```bash
             (base) (my_venv):-$ conda deactivate
             ```
+    - To see your existing environment or verify if the new environment was created, use this command:
+        ```bash
+        conda info --envs
+        ```
+
+    - To delete or remove the environment, type the following in your terminal:
+        ```bash
+        # The --all option helps remove all packages from the environment named env_name
+        conda remove --name env_name --all
+        ```
 ## 3. Verify Tensorflow installation
 
 Now that our python environment setup, we can add TensorFlow tutorial to our python file `tutorial.py` and execute the python code. You can find a list of tutorials on the offical [TensorFlow Home](https://www.tensorflow.org/tutorials)
