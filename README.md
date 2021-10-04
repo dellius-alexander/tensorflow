@@ -41,6 +41,8 @@ else
 fi
 
 ```
+*To control whether or not each shell session has the base environment activated or not, run conda `config --set auto_activate_base False or True`. To run conda from anywhere without having the base environment activated by default, use conda `config --set auto_activate_base False`. This only works if you have run conda init first.*
+
 
 After installation and initialization of `Conda` your terminal should be prefixed with "`(base) :-$`".<br/>
 Now we can move onto installing `Tensorflow`.
@@ -51,9 +53,9 @@ Now we can move onto installing `Tensorflow`.
 
 - VSCode Extension: to enhance the whole experience install the following extensions
     - donjayamanne.python-extension-pack
-    - changkaiyan.tf2snippets
+    - changkaiyan.tf2snippets (Tensorflow 2.0 Snippets)
     - ms-toolsai.jupyter
-    - ms-vscode.cpptools
+    - ms-vscode.cpptools (Microsoft C++ tools)
     - redhat.fabric8-analytics
 
 - Add the below settings to your `~/project_folder/.vscode/settings.json` file located in your workspace. This will tell vscode to use the virtual environment interpreter and environment to run your project scripts.
@@ -120,7 +122,15 @@ Now we can move onto installing `Tensorflow`.
             ```
         - To deactivate an active environment, use
             ```bash
-            (my_venv):-$ conda deactivate
+            (my_venv) :-$ conda deactivate
+            # conda reverts back to base
+            (base) :-$
+            ```
+        - To deactivate conda run:
+            ```bash
+            (base) :-$ conda deactivate
+            # terminal is no longer prepended with conda (base)
+            :-$
             ```
     - To see your existing environment or verify if the new environment was created, use this command:
         ```bash
@@ -143,7 +153,7 @@ Now we can move onto installing `Tensorflow`.
         ```
 ## 3. Verify Tensorflow installation
 
-Now that our python environment setup, we can add TensorFlow tutorial to our python file `tutorial.py` and execute the python code. You can find a list of tutorials on the offical [TensorFlow Home](https://www.tensorflow.org/tutorials)
+Now that our python environment setup, we can add TensorFlow tutorial to our python file `tutorial.py` and execute the python code. You can find a list of tutorials on the offical [TensorFlow Home](https://www.tensorflow.org/tutorials).
 
 The below should be all you need to verify you installation of `TensorFlow`. If you receive any error their maybe some dependencies issues.
 
