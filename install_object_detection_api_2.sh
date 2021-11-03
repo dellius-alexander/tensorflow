@@ -14,9 +14,8 @@
 # gcc \
 # build-essentials
 #####################################################################
-### USAGE: bash install_object_detection_api_2.sh \
+### USAGE: bash install_object_detection_api_2.sh [PARAM 1] [PARAM 1]\
 ######  
-######
 ######  Parameters: ${1} = [PATH to Tensorflow Models Directory [models]]
 ######              ${2} = [Your OS flavor]
 #####################################################################
@@ -71,7 +70,7 @@ elif [ -f "${DOCKERFILE}" ] && [[ $(cat $DOCKERFILE | grep -ic "ARG FLAVOR='${FL
 # add build args to after "FROM" statement in Dockerfile if not present
 elif [ -f "${DOCKERFILE}" ] && [[ $(cat $DOCKERFILE | grep -ic "ARG FLAVOR='${FLAVOR}'") -eq 0 ]]; then
     sed "/FROM tensorflow\/tensorflow/ a \
-    ARG FLAVOR='${FLAVOR}'
+    ARG FLAVOR=\"${FLAVOR}\"
     " $DOCKERFILE | tee $DOCKERFILE
 fi;
 # now check for post-modified Dockerfile and update it if has not been modified
