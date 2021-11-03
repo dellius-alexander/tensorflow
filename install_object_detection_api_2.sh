@@ -57,9 +57,9 @@ sed -i 's/$(lsb_release -c -s)/bionic/g' Models/research/object_detection/docker
 # ARG RESEARCH_DIR="/home/tensorflow/models/research"
 # EOF
 # Build the docker container to run the Object Detection API
-docker build -f ${MODELS_DIR}/research/object_detection/dockerfiles/tf2/Dockerfile -t od ${MODELS_DIR}
+docker build -f ${MODELS_DIR}/research/object_detection/dockerfiles/tf2/Dockerfile -t object-detection:0.1 ${MODELS_DIR}
 # Now RUN the Object Detection Image "od" you created above
-docker run -it -v ${MODELS_DIR}:/home/tensorflow/models/research:rw -d od
+docker run -it -v ${MODELS_DIR}:/home/tensorflow/models/research:rw -d --name object-detection object-detection:0.1
 # change directory and compile Object Detection API protocols
 cd ${RESEARCH_DIR}
 # Compile the Object Detection API protocols into --python_out=<some directory | [default]. >
@@ -72,5 +72,7 @@ cp ${MODELS_DIR}/research/object_detection/packages/tf2/setup.py ${RESEARCH_DIR}
 # pip install gast==0.3.3 h5py<2.11.0,>=2.10.0 tensorboard<2.3.0,>=2.2.0
 # install the built module into your python/conda environment 
 python3 -m pip install --use-feature=2020-resolver ${RESEARCH_DIR}
+# Kill docker  object-detection container
+docker stop object-detection && docker rm object-detection
 # Test the installation.
 python3 ${RESEARCH_DIR}/object_detection/builders/model_builder_tf2_test.py
