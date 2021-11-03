@@ -4,6 +4,10 @@ import os, tensorflow_datasets as tfds,\
     platform,socket,re,uuid,json,psutil,logging,\
         pandas as pd, re
 from typing import List
+# You have to build the object detection API before you can use 
+# model builder.
+from object_detection.builders import model_builder as mb
+from object_detection.utils import config_util as cu 
 
 #####################################################################
 #Shamelessly combined from google and other stackoverflow like 
@@ -109,19 +113,21 @@ open("DatasetInfo.json","wb").write(info.as_json.encode())
 #####################################################################
 # Tensorflow dataset tools
 # https://github.com/tensorflow/models/tree/master/research/object_detection/dataset_tools
-rtn = os.system('python3 create_pascal_tf_record.py \
-        --data_dir={0}{1} \
-        --year={2} \
-        --output_path={0}{1}'.
-        format(
-            info.data_dir,  # "/home/user/VOCdevkit",
-            ps,             # path separator
-            "VOC2007"       # "VOC2012",
-                            # "/home/user/pascal.record"
-        ))
-print(rtn)
+# rtn = os.system('python3 create_pascal_tf_record.py \
+#         --data_dir={0}{1} \
+#         --year={2} \
+#         --output_path={0}{1}'.
+#         format(
+#             info.data_dir,  # "/home/user/VOCdevkit",
+#             ps,             # path separator
+#             "VOC2007"       # "VOC2012",
+#                             # "/home/user/pascal.record"
+#         ))
+# print(rtn)
 
+detection_model = mb.build(cu.model_pb2.DetectionModel(),is_training=True)
 
+print(detection_model)
 # # Normalize pixel values to be between 0 and 1
 # # dataset = dataset / 255.0
 # for d in dataset:
