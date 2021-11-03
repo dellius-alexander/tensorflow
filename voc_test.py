@@ -8,6 +8,8 @@ from typing import List
 # model builder.
 from object_detection.builders import model_builder as mb
 from object_detection.utils import config_util as cu 
+from object_detection.protos import model_pb2 as mpb2
+from tensorflow_datasets.core.proto.dataset_info_generated_pb2 import DatasetInfo
 
 #####################################################################
 #Shamelessly combined from google and other stackoverflow like 
@@ -86,7 +88,27 @@ def get_dataset(dataset_directory,batch_size):
                         split=["train","validation","test"],
                         with_info=True
                         )
-#####################################################################
+####################################################################
+def get_dataset_info_as_json(info=DatasetInfo):
+    info_json = {
+        'name': info.name,
+        'full_name': info.full_name,
+        'description': info.description,
+        'homepage': info.homepage,
+        'data_path': info.data_dir,
+        'download_size': info.download_size,
+        'dataset_size': info.dataset_size,
+        'features': info.features.to_json(),
+        'supervised_keys': info.supervised_keys,
+        'disable_shuffling': info.disable_shuffling,
+        'splits': json.dumps(str(info.splits.items()),check_circular=True,indent=4,separators=(',',':'),cls=JSONEncoder),
+        'citation': info.citation
+    }
+    info_json = json.dumps(info_json,check_circular=True,indent=4,separators=(',',':'))
+    # print(info_json)
+    open("DatasetInfo.json","wb").write(bytes(info_json,"utf-8"))
+    return info_json
+    #####################################################################
 # get the system info
 df = getSystemInfo()
 #####################################################################
@@ -107,9 +129,14 @@ if plat.match("Window"):
 data_dir_name = "Tensorflow_datasets"
 # create dataset of batch size 32/64/128/
 dataset, info = get_dataset(data_dir_name,32)
-data_path = get_dataset_dir(data_dir_name)
-print( info.as_json)
-open("DatasetInfo.json","wb").write(info.as_json.encode())
+# get the newly creaed dataset directory path
+data_path = info.data_dir
+# create json file of the dataset info and [optionally print info]
+print(get_dataset_info_as_json(info))
+
+
+# detection_model = mb.build(info._metadata,is_training=True)
+# print(detection_model)
 #####################################################################
 # Tensorflow dataset tools
 # https://github.com/tensorflow/models/tree/master/research/object_detection/dataset_tools
@@ -125,9 +152,9 @@ open("DatasetInfo.json","wb").write(info.as_json.encode())
 #         ))
 # print(rtn)
 
-detection_model = mb.build(cu.model_pb2.DetectionModel(),is_training=True)
+# detection_model = mb.build(cu.model_pb2.DetectionModel(),is_training=True)
 
-print(detection_model)
+# print(detection_model)
 # # Normalize pixel values to be between 0 and 1
 # # dataset = dataset / 255.0
 # for d in dataset:
