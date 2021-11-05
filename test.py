@@ -68,7 +68,7 @@ print("TensorFlow version: ", tf.__version__)
 # # # Here's the complete architecture of your model:
 # # model.summary()
 
-# # Compile and train the model
+# # Compile and train the modelprefix: ${PWD}/my_venv
 # # model.compile(optimizer=)
 
 # # ds_numpy = tfds.as_numpy(dataset)

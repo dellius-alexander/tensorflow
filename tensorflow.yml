@@ -1,5 +1,5 @@
 # exported configuration file of working environment
-name: ${PWD}/my_venv
+name: Tensorflow
 channels:
   - defaults
 dependencies:
@@ -362,4 +362,3 @@ dependencies:
   - zope.event=4.5.0=py38_0
   - zope.interface=5.3.0=py38h27cfd23_0
   - zstd=1.4.5=h9ceee32_0
-prefix: ${PWD}/my_venv
