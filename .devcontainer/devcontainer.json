@@ -5,16 +5,18 @@
 	"runArgs": ["--init", "--privileged","--gpus=all"],
 	"build": {
 		// "context": "Tensorflow/.devcontainer/",
-		"dockerfile": "Dockerfile",
+		"dockerfile": "base.Dockerfile",
 		"args": {
 			"NODE_VERSION": "lts/*",
-			"INSTALL_ZSH": "true"
+			"INSTALL_ZSH": "true",
+			"CONDA_HOME": "/home/tensorflow/anaconda3"
 		}
 	},
 
 	// Set *default* container specific settings.json values on container create.
 	"settings": { 
 		"python.pythonPath": "/home/tensorflow/anaconda3/envs/Tensorflow/bin/python3",
+		"python.condaPath": "/home/tensorflow/anaconda3/condabin/",
 		"python.languageServer": "Pylance",
 		"python.linting.enabled": true,
 		"python.linting.pylintEnabled": true,
@@ -48,7 +50,7 @@
 	// "forwardPorts": [],
 
 	// Use 'postCreateCommand' to run commands after the container is created.
-	"postCreateCommand": "python --version && /usr/bin/zsh  && conda activate /home/tensorflow/anaconda3/envs/Tensorflow",
+	"postCreateCommand": "python --version && /usr/bin/zsh  && conda activate /home/tensorflow/anaconda3/envs/Tensorflow && conda activate /home/tensorflow/anaconda3/envs/Tensorflow",
 
 	// Comment out connect as root instead. More info: https://aka.ms/vscode-remote/containers/non-root.
 	"remoteUser": "tensorflow"

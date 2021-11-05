@@ -94,8 +94,6 @@ if [[ $(sha256sum /tmp/Anaconda3-2021.05-Linux-x86_64.sh | awk '{print $1}') =~ 
 EOF
 fi;
 done;
-    wait $!    &&
-    # Update conda
     # usage: conda update [-h] [-n ENVIRONMENT | -p PATH] [-c CHANNEL] [--use-local]
     #                 [--override-channels] [--repodata-fn REPODATA_FNS]
     #                 [--strict-channel-priority] [--no-channel-priority]
@@ -127,7 +125,7 @@ if [[ -f "${ENV_FILE}" ]]; then
     # conda env create -f "${ENV_FILE}" --prefix="${TENSORFLOW_CONDA_ENV}" &&
     # $shell && 
     # activate Tensorflow environment
-    conda activate Tensorflow && 
+    conda activate "${CONDA_HOME}/envs/Tensorflow" && 
     export PYTHONPATH="${CONDA_HOME}/envs/Tensorflow/bin/python3.8" && 
     python3 -m pip install tensorflow_datasets fiftyone && 
     python3 -m pip install --use-feature=2020-resolver /home/tensorflow/models/research

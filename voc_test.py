@@ -133,8 +133,7 @@ dataset, info = get_dataset(data_dir_name,32)
 data_path = info.data_dir
 # create json file of the dataset info and [optionally print info]
 print(get_dataset_info_as_json(info))
-
-
+logging.info("This is a test....")
 # detection_model = mb.build(info._metadata,is_training=True)
 # print(detection_model)
 #####################################################################

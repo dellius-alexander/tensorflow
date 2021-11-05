@@ -7,7 +7,7 @@ ARG USERNAME="tensorflow"
 ARG USER_UID=1000
 ARG USER_GID=${USER_UID}
 ARG DEBIAN_FRONTEND=noninteractive
-ARG CONDA
+
 
 COPY library-scripts/* /tmp/library-scripts/
 RUN ls -lia /tmp/library-scripts
