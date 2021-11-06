@@ -24,19 +24,19 @@ print("TensorFlow version: ", tf.__version__)
 # #! Warning: Manually default download to ~/tensorflow_datasets/manual/imagenet2012
 
 # # Build the dataset
-# data_path = os.path.abspath("Tensorflow_datasets")
-# print(data_path)
-# # # Create an instance of your custom dataset importer
-# # importer = foud.importers.DatasetImporter(
-# #                                         data_path,
-# #                                         shuffle=False,
-# #                                         seed=123,
-# #                                         max_samples=100)
-# # # Import the dataset!
-# # dataset = fo.Dataset.from_importer(importer,name="voc")
+# data_path = os.path.abspath("Tensorflow_datasets/downloads/extracted/VOC2007_test/VOCdevkit")
+# # print(data_path)
+# # Create an instance of your custom dataset importer
+# importer = foud.importers.DatasetImporter(
+#                                         data_path,
+#                                         shuffle=False,
+#                                         seed=123,
+#                                         max_samples=100)
+# # Import the dataset!
+# dataset = fo.Dataset.from_importer(importer,name="voc2007")
 
-# # session = fo.launch_app(dataset)
-# # session.wait()
+# session = fo.launch_app(dataset)
+# session.wait()
 
 
 # (dataset, dataset_info)= tfds.load(
