@@ -2,14 +2,41 @@ from json.decoder import JSONDecoder
 from json.encoder import JSONEncoder
 import os, tensorflow_datasets as tfds,\
     platform,socket,re,uuid,json,psutil,logging,\
-        pandas as pd, re
+        pandas as pd, re, lxml
+from object_detection.dataset_tools import create_pascal_tf_record as cptr
 from typing import List
 # You have to build the object detection API before you can use 
 # model builder.
+import object_detection as od
+from object_detection.builders import dataset_builder as dbr
 from object_detection.builders import model_builder as mb
-from object_detection.utils import config_util as cu 
+from object_detection.utils import config_util as cu, dataset_util, label_map_util
 from object_detection.protos import model_pb2 as mpb2
+from tensorflow_datasets.core import utils
 from tensorflow_datasets.core.proto.dataset_info_generated_pb2 import DatasetInfo
+from lxml import etree
+from object_detection.protos.string_int_label_map_pb2 import StringIntLabelMap, StringIntLabelMapItem
+from google.protobuf import text_format
+import tensorflow_datasets as tfds
+import tensorflow as tf
+#####################################################################
+# Setup Logging
+logging.basicConfig(format='%(asctime)s %(message)s',filename="tensorflow.log", datefmt='%m/%d/%Y %I:%M:%S %p',level=logging.DEBUG)
+logging.debug('This message is a test for log level...DEBUG')
+logging.info('This message is a test for log level...INFO')
+logging.warning('This message is a test for log level...WARNING')
+logging.error('This message is a test for log level...ERROR')
+#####################################################################
+def convert_classes(classes, start=1):
+    """
+    Converting python list to label_map.pbtxt
+    """
+    msg = StringIntLabelMap()
+    for id, name in enumerate(classes, start=start):
+        msg.item.append(StringIntLabelMapItem(id=id, name=name))
+
+    text = str(text_format.MessageToBytes(msg, as_utf8=True), 'utf-8')
+    return text
 
 #####################################################################
 #Shamelessly combined from google and other stackoverflow like 
@@ -106,6 +133,7 @@ def get_dataset_info_as_json(info=DatasetInfo):
     }
     info_json = json.dumps(info_json,check_circular=True,indent=4,separators=(',',':'))
     # print(info_json)
+    logging.info(info_json)
     open("DatasetInfo.json","wb").write(bytes(info_json,"utf-8"))
     return info_json
     #####################################################################
@@ -132,25 +160,98 @@ dataset, info = get_dataset(data_dir_name,32)
 # get the newly creaed dataset directory path
 data_path = info.data_dir
 # create json file of the dataset info and [optionally print info]
-print(get_dataset_info_as_json(info))
-logging.info("This is a test....")
-# detection_model = mb.build(info._metadata,is_training=True)
-# print(detection_model)
-#####################################################################
-# Tensorflow dataset tools
-# https://github.com/tensorflow/models/tree/master/research/object_detection/dataset_tools
-# rtn = os.system('python3 create_pascal_tf_record.py \
-#         --data_dir={0}{1} \
-#         --year={2} \
-#         --output_path={0}{1}'.
-#         format(
-#             info.data_dir,  # "/home/user/VOCdevkit",
-#             ps,             # path separator
-#             "VOC2007"       # "VOC2012",
-#                             # "/home/user/pascal.record"
-#         ))
-# print(rtn)
+# logging.info(get_dataset_info_as_json(info))
+# train_dir = "Tensorflow_datasets/downloads/extracted/VOC2007_train"
+# test_dir = "Tensorflow_datasets/downloads/extracted/VOC2007_test"
+# train_annot_dir = train_dir+"/VOCdevkit/VOC2007/Annotations"
+# train_image_dir = train_dir+"/VOCdevkit/VOC2007/JPEGImages"
+train_data_path = "Tensorflow_datasets/downloads/extracted/VOC2007_train/VOCdevkit"
+test_data_path = "Tensorflow_datasets/downloads/extracted/VOC2007_test/VOCdevkit"
+output_path = "Tensorflow_datasets/data"
+label_directory = "Tensorflow_datasets/data/label_map.pbtxt"
+raw_labels = "Tensorflow_datasets/voc/2007/4.0.0/labels.labels.txt"
 
+#####################################################################
+# serialize the classes from the raw labels file and convert to bytes
+## and write the serialized list of classes to file
+#####################################################################
+### get the contents of the labels file
+my_file = open(raw_labels, "r")
+### read the contents of labels file
+content = my_file.read()
+### convert the contents to list
+class_label_list = content.split("\n")
+my_file.close() # Close the file
+logging.info("""
+Class List:\n{0}
+""".format(class_label_list))
+### serialize the list of classes
+class_bytes_label_serialized = convert_classes(class_label_list)
+# write the converted classes to label_map.pbtxt file
+with open(label_directory, 'w') as f:
+        f.write(class_bytes_label_serialized)
+#####################################################################
+#####################################################################
+##### Convert raw PASCAL dataset to TFRecord for object_detection.
+####### Models based on the TensorFlow object detection API need a 
+####### special format for all input data, called "TFRecord".
+#####################################################################
+# A TFRecord file stores your data as a sequence of binary strings. 
+# This means you need to specify the structure of your data before 
+# you write it to the file. Tensorflow provides two components for 
+# this purpose: tf.train.Example and tf.train.SequenceExample. You 
+# have to store each sample of your data in one of these structures, 
+# then serialize it and use a tf.python_io.TFRecordWriter to write it 
+# to disk.
+#####################################################################
+# (module) create_pascal_tf_record
+# Convert raw PASCAL dataset to TFRecord for object_detection.
+# Example usage:
+#     python object_detection/dataset_tools/create_pascal_tf_record.py
+#         --label_map_path=/home/user/VOCdevkit/label_map*
+#         --data_dir=/home/user/VOCdevkit
+#         --year=VOC2012
+#         --set=["train","test"]
+#         --output_path=/home/user/pascal.record
+#         --category=["cat","dog"]
+#
+# capture return variable; it should be 0 if all went well...
+rtn = os.system('''python3 Models/research/object_detection/dataset_tools/create_pascal_tf_record.py \
+        --data_dir={0} \
+        --year={1} \
+        --set={2} \
+        --output_path={3} \
+        --category={4} \
+        --label_map_path={5}'''.
+    format(
+        train_data_path,  #   --data_dir=/home/user/VOCdevkit
+        "VOC2007",      #   --year=VOC2012
+        "train",        #   --set=["train","test"]
+        (output_path+"/train_pascal.record"),    #   --output_path=/home/user/pascal.record
+        class_label_list,    #   --category=["cat","dog"]
+        label_directory #   --label_map_path=/home/user/voc_opath/label_map.pbtxt*
+    ))
+print(rtn)
+rtn = os.system('''python3 Models/research/object_detection/dataset_tools/create_pascal_tf_record.py \
+        --data_dir={0} \
+        --year={1} \
+        --set={2} \
+        --output_path={3} \
+        --category={4} \
+        --label_map_path={5}'''.
+    format(
+        test_data_path,  #   --data_dir=/home/user/VOCdevkit
+        "VOC2007",      #   --year=VOC2012
+        "test",        #   --set=["train","test"]
+        (output_path+"/test_pascal.record"),    #   --output_path=/home/user/pascal.record
+        class_label_list,    #   --category=["cat","dog"]
+        label_directory #   --label_map_path=/home/user/voc_opath/label_map.pbtxt*
+    ))
+print(rtn)
+with open('Tensorflow_datasets/voc/2007/4.0.0/features.json') as file:
+    features = json.load(file,cls=JSONDecoder)
+    features_json = json.dumps(features,check_circular=True,indent=4)
+print(features_json)
 # detection_model = mb.build(cu.model_pb2.DetectionModel(),is_training=True)
 
 # print(detection_model)
