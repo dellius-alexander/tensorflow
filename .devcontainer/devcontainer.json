@@ -5,7 +5,7 @@
 	"runArgs": ["--init", "--privileged","--gpus=all"],
 	"build": {
 		// "context": "Tensorflow/.devcontainer/",
-		"dockerfile": "Dockerfile",
+		"dockerfile": "base.Dockerfile",
 		"args": {
 			"TFVERSION": "2.6.1",
 			"NODE_VERSION": "lts/*",

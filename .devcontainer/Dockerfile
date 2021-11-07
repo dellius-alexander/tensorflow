@@ -87,17 +87,8 @@ RUN echo '[GoogleCompute]\nservice_account = default' > /etc/boto.cfg
 # Setup object detection on top of Tenserflow
 FROM setup_conda
 RUN cd /home/tensorflow  && \
-__conda_setup='$("${CONDA_HOME}/bin/conda" "shell.${SHELL}" "hook" 2> /dev/null)' && \
-    if [ $? -eq 0 ]; then \
-    eval "$__conda_setup"  \
-    else \
-        if [ -f "${CONDA_HOME}/etc/profile.d/conda.sh" ]; then \
-            # commented out by conda initialize
-            eval "${CONDA_HOME}/etc/profile.d/conda.sh" \
-        else \
-            export PATH="${CONDA_HOME}/bin:${PATH}" \
-        fi; \
-    fi; && \
+    # conda initialize
+    source "/home/tensorflow/anaconda3/etc/profile.d/conda.sh" && \
     conda activate Tensorflow
 ## Copy this code (make sure you are under the ../models/research directory)
 RUN git clone https://github.com/tensorflow/models.git /home/tensorflow/models && \
@@ -114,7 +105,10 @@ RUN cp /home/tensorflow/models/research/object_detection/packages/tf2/setup.py /
 RUN python -m pip install -U pip
 RUN python -m pip install /home/tensorflow/models/research
 
-# RUN if [ -f "/tmp/conda-tmp/environment.yml" ]; then /opt/conda/bin/conda env create -f /tmp/conda-tmp/environment.yml; fi \
-#     && rm -rf /tmp/conda-tmp
+# Clean up
+RUN apt-get autoremove -y \
+    && apt-get clean -y \
+    && rm -rf /var/lib/apt/lists/*  /tmp/library-scripts/ /tmp/conda-tmp/ /home/tensorflow/models/
+
 # ENTRYPOINT ["python", "object_detection/model_main_tf2.py"]
 ENTRYPOINT [ "conda", "activate", "Tensorflow" ]

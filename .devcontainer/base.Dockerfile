@@ -1,4 +1,4 @@
-FROM dalexander2israel/tensorflow-object_detection_api:2.6.0
+FROM registry.dellius.app/tensorflow/tensorflow-object_detection_api_01:2.6.1
 ARG CONDA_HOME="/home/tensorflow/anaconda3"
 RUN rm -rf /tmp/conda-tmp  /tmp/library-scripts  /home/tensorflow/models && \
     apt-get autoremove -y && apt-get clean
