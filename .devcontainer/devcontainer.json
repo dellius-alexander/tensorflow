@@ -5,10 +5,15 @@
 	"runArgs": ["--init", "--privileged","--gpus=all"],
 	"build": {
 		// "context": "Tensorflow/.devcontainer/",
-		"dockerfile": "base.Dockerfile",
+		"dockerfile": "Dockerfile",
 		"args": {
+			"TFVERSION": "2.6.1",
 			"NODE_VERSION": "lts/*",
 			"INSTALL_ZSH": "true",
+			"USERNAME": "tensorflow",
+			"USER_UID": "1000",
+			"PYTHONVERSION": "3.8",
+			"WORK_DIR": "/home/tensorflow/Tensorflow",
 			"CONDA_HOME": "/home/tensorflow/anaconda3"
 		}
 	},

@@ -1,13 +1,16 @@
 # See here for image contents: https://github.com/microsoft/vscode-dev-containers/tree/v0.202.5/containers/python-3-anaconda/.devcontainer/base.Dockerfile
+ARG TFVERSION=2.6.1
+FROM tensorflow/tensorflow:${TFVERSION}-gpu as setup_gcsdk
 
-FROM tensorflow/tensorflow:latest-gpu as compile_models
-
+ARG NODE_VERSION="true"
 ARG INSTALL_ZSH="true"
 ARG USERNAME="tensorflow"
 ARG USER_UID=1000
 ARG USER_GID=${USER_UID}
 ARG DEBIAN_FRONTEND=noninteractive
-
+ARG PYTHONVERSION=3.8
+ARG WORK_DIR="/home/tensorflow/Tensorflow"
+ARG CONDA_HOME="/home/tensorflow/anaconda3"
 
 COPY library-scripts/* /tmp/library-scripts/
 RUN ls -lia /tmp/library-scripts
@@ -42,30 +45,10 @@ RUN wget -nv \
     rm -rf /root/.config/* && \
     ln -s /root/.config /config && \
     rm -rf /root/tools/google-cloud-sdk/.install/.backup
-
 # Path configuration
 ENV PATH $PATH:/root/tools/google-cloud-sdk/bin
-# Make sure gsutil will use the default service account
-RUN echo '[GoogleCompute]\nservice_account = default' > /etc/boto.cfg
-
-WORKDIR /home/tensorflow
-
-## Copy this code (make sure you are under the ../models/research directory)
-RUN git clone https://github.com/tensorflow/models.git /home/tensorflow/models && \
-    ls -lia /home/tensorflow/models/research
-
-# Compile protobuf configs
-RUN cd /home/tensorflow/models/research && \
-    protoc object_detection/protos/*.proto  \
-    --python_out=.
-WORKDIR /home/tensorflow/Tensorflow/
-
-RUN cp /home/tensorflow/models/research/object_detection/packages/tf2/setup.py /home/tensorflow/models/research
-# Export a few changes to path variable
-ENV PATH="/home/tensorflow/.local/bin:${PATH}"
-
-RUN python -m pip install -U pip
-RUN python -m pip install /home/tensorflow/models/research
+# Setup anaconda
+FROM setup_gcsdk as setup_conda
 # Install oh-my-zsh
 RUN rm -rf ~/.oh-my-zsh && sh -c "$(curl -fsSL https://raw.github.com/ohmyzsh/ohmyzsh/master/tools/install.sh)" "Y"
 # Copy environment.yml (if found) to a temp location so we update the environment. Also
@@ -81,12 +64,44 @@ COPY environment.yml* /tmp/conda-tmp/
 RUN /bin/bash /tmp/library-scripts/anaconda.sh \
     "-b" \
     "-p" \
-    "/home/tensorflow/anaconda3" \
-    "/home/tensorflow/Tensorflow" \
-    "tensorflow" \
+    "${CONDA_HOME}" \
+    "${WORK_DIR}" \
+    "${USERNAME}" \
     "/tmp/conda-tmp/environment.yml"
+# setup alias for our new python environment
+RUN alias python='/usr/bin/python3.4' && \
+    echo 'alias python="/usr/bin/python3.4"' >> /home/tensorflow/.bashrc && \
+    echo 'alias python="/usr/bin/python3.4"' >> /home/tensorflow/.zshrc
+# copy a symbolic link of conda to our .local/bin directory
+RUN ln -s "${CONDAPATH}/conda"  "/home/tensorflow/.local/bin"
+# Export a few changes to path variables and environment variables
+ENV PATH="/home/tensorflow/.local/bin:${CONDAPATH}:${CONDA_HOME}/envs/Tensorflow/bin:${PATH}"
 ENV CONDA_HOME="${CONDA_HOME}"
-ENV PYTHONPATH="${CONDA_HOME}/envs/Tensorflow/bin/python3.8" 
+ENV PYTHONPATH="${CONDA_HOME}/envs/Tensorflow/bin/python${PYTHONVERSION}" 
+ENV CONDAPATH="${CONDA_HOME}/condabin/"
+# Make sure gsutil will use the default service account
+RUN echo '[GoogleCompute]\nservice_account = default' > /etc/boto.cfg
+# Define our work directory
+WORKDIR /${WORK_DIR}
+# Setup object detection on top of Tenserflow
+FROM setup_conda
+RUN cd /home/tensorflow && conda init && conda activate Tensorflow && conda activate Tensorflow
+## Copy this code (make sure you are under the ../models/research directory)
+RUN git clone https://github.com/tensorflow/models.git /home/tensorflow/models && \
+    ls -lia /home/tensorflow/models/research
+
+# Compile protobuf configs
+RUN cd /home/tensorflow/models/research && \
+    protoc object_detection/protos/*.proto  \
+    --python_out=.
+WORKDIR /home/tensorflow/Tensorflow/
+
+RUN cp /home/tensorflow/models/research/object_detection/packages/tf2/setup.py /home/tensorflow/models/research
+
+RUN python -m pip install -U pip
+RUN python -m pip install /home/tensorflow/models/research
+
 # RUN if [ -f "/tmp/conda-tmp/environment.yml" ]; then /opt/conda/bin/conda env create -f /tmp/conda-tmp/environment.yml; fi \
 #     && rm -rf /tmp/conda-tmp
 # ENTRYPOINT ["python", "object_detection/model_main_tf2.py"]
+ENTRYPOINT [ "conda", "activate", "Tensorflow" ]

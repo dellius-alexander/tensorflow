@@ -128,7 +128,8 @@ if [[ -f "${ENV_FILE}" ]]; then
     conda activate "${CONDA_HOME}/envs/Tensorflow" && 
     export PYTHONPATH="${CONDA_HOME}/envs/Tensorflow/bin/python3.8" && 
     python3 -m pip install tensorflow_datasets fiftyone && 
-    python3 -m pip install --use-feature=2020-resolver /home/tensorflow/models/research
+    # python3 -m pip install --use-feature=2020-resolver /home/tensorflow/models/research
     printf "${RED}\nTensorflow has been install at: \n{\n \t\"env_name\": \"Tensorflow\", \n\t\"path\": \"${TENSORFLOW_CONDA_ENV}\" \n}\n\n${NC}"
     # [[ $? != 0 ]] && echo $? && exit 1
 fi
+return 0
