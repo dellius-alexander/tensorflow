@@ -55,7 +55,7 @@
 	// "forwardPorts": [],
 
 	// Use 'postCreateCommand' to run commands after the container is created.
-	"postCreateCommand": "python --version && /usr/bin/zsh  && conda activate /home/tensorflow/anaconda3/envs/Tensorflow && conda activate /home/tensorflow/anaconda3/envs/Tensorflow",
+	"postCreateCommand": "python --version && ls -lia /home/tensorflow && /usr/bin/zsh  && conda activate /home/tensorflow/anaconda3/envs/Tensorflow && conda activate /home/tensorflow/anaconda3/envs/Tensorflow",
 
 	// Comment out connect as root instead. More info: https://aka.ms/vscode-remote/containers/non-root.
 	"remoteUser": "tensorflow"

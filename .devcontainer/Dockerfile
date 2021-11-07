@@ -90,25 +90,28 @@ RUN cd /home/tensorflow  && \
     # conda initialize
     source "/home/tensorflow/anaconda3/etc/profile.d/conda.sh" && \
     conda activate Tensorflow
+# Define a work directory
+WORKDIR /home/tensorflow/
 ## Copy this code (make sure you are under the ../models/research directory)
 RUN git clone https://github.com/tensorflow/models.git /home/tensorflow/models && \
     ls -lia /home/tensorflow/models/research
 
+RUN python3 -m pip install -U pip
 # Compile protobuf configs
 RUN cd /home/tensorflow/models/research && \
     protoc object_detection/protos/*.proto  \
     --python_out=.
-WORKDIR /home/tensorflow/Tensorflow/
-
+# copy setup.py to models/research
 RUN cp /home/tensorflow/models/research/object_detection/packages/tf2/setup.py /home/tensorflow/models/research
-
-RUN python -m pip install -U pip
-RUN python -m pip install /home/tensorflow/models/research
-
+RUN ls -lia /home/tensorflow/models/research
+RUN source "/home/tensorflow/anaconda3/etc/profile.d/conda.sh" && \
+    conda activate /home/tensorflow/anaconda3/envs/Tensorflow && \
+    cd /home/tensorflow/models/research && \
+    python3 -m pip install  /home/tensorflow/models/research
 # Clean up
 RUN apt-get autoremove -y \
     && apt-get clean -y \
-    && rm -rf /var/lib/apt/lists/*  /tmp/library-scripts/ /tmp/conda-tmp/ /home/tensorflow/models/
+    && rm -rf /var/lib/apt/lists/*  /tmp/library-scripts/ /tmp/conda-tmp/ /home/tensorflow/models
 
 # ENTRYPOINT ["python", "object_detection/model_main_tf2.py"]
 ENTRYPOINT [ "conda", "activate", "Tensorflow" ]
