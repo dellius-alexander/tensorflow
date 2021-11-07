@@ -72,8 +72,10 @@ RUN /bin/bash /tmp/library-scripts/anaconda.sh \
 RUN alias python='/usr/bin/python3.4' && \
     echo 'alias python="/usr/bin/python3.4"' >> /home/tensorflow/.bashrc && \
     echo 'alias python="/usr/bin/python3.4"' >> /home/tensorflow/.zshrc
+# Define our work directory
+WORKDIR /${WORK_DIR}
 # copy a symbolic link of conda to our .local/bin directory
-RUN ln -s "${CONDAPATH}/conda"  "/home/tensorflow/.local/bin"
+# RUN ln -s "${CONDAPATH}/conda"  "/home/tensorflow/.local/bin"
 # Export a few changes to path variables and environment variables
 ENV PATH="/home/tensorflow/.local/bin:${CONDAPATH}:${CONDA_HOME}/envs/Tensorflow/bin:${PATH}"
 ENV CONDA_HOME="${CONDA_HOME}"
@@ -81,11 +83,22 @@ ENV PYTHONPATH="${CONDA_HOME}/envs/Tensorflow/bin/python${PYTHONVERSION}"
 ENV CONDAPATH="${CONDA_HOME}/condabin/"
 # Make sure gsutil will use the default service account
 RUN echo '[GoogleCompute]\nservice_account = default' > /etc/boto.cfg
-# Define our work directory
-WORKDIR /${WORK_DIR}
+
 # Setup object detection on top of Tenserflow
 FROM setup_conda
-RUN cd /home/tensorflow && conda init && conda activate Tensorflow && conda activate Tensorflow
+RUN cd /home/tensorflow  && \
+__conda_setup='$("${CONDA_HOME}/bin/conda" "shell.${SHELL}" "hook" 2> /dev/null)' && \
+    if [ $? -eq 0 ]; then \
+    eval "$__conda_setup"  \
+    else \
+        if [ -f "${CONDA_HOME}/etc/profile.d/conda.sh" ]; then \
+            # commented out by conda initialize
+            eval "${CONDA_HOME}/etc/profile.d/conda.sh" \
+        else \
+            export PATH="${CONDA_HOME}/bin:${PATH}" \
+        fi; \
+    fi; && \
+    conda activate Tensorflow
 ## Copy this code (make sure you are under the ../models/research directory)
 RUN git clone https://github.com/tensorflow/models.git /home/tensorflow/models && \
     ls -lia /home/tensorflow/models/research

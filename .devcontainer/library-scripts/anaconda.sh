@@ -119,7 +119,7 @@ if [[ -f "${ENV_FILE}" ]]; then
     printf "${RED}\nInstalling Tensorflow at: \n{\n \t\"env_name\": \"Tensorflow\", \n\t\"path\": \"${TENSORFLOW_CONDA_ENV}\" \n}\n\n${NC}"
         # Start a new shell
     $shell
-    conda init &&
+    ln -s ${CONDA_HOME}/condabin/conda /usr/local/bin &&
     conda update -n base -c defaults conda && 
     conda env create -f "${ENV_FILE}"  --prefix=${TENSORFLOW_CONDA_ENV} &&
     # conda env create -f "${ENV_FILE}" --prefix="${TENSORFLOW_CONDA_ENV}" &&
@@ -132,4 +132,3 @@ if [[ -f "${ENV_FILE}" ]]; then
     printf "${RED}\nTensorflow has been install at: \n{\n \t\"env_name\": \"Tensorflow\", \n\t\"path\": \"${TENSORFLOW_CONDA_ENV}\" \n}\n\n${NC}"
     # [[ $? != 0 ]] && echo $? && exit 1
 fi
-return 0
