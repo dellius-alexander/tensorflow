@@ -5,6 +5,7 @@
 ## Prerequisites:
 - [Tensorflow](https://www.tensorflow.org/install) must be installed in your virtual environment
 - [Object Detection API](README.md#object-detection-api-install/)
+- [Fiftyone](https://voxel51.com/docs/fiftyone/index.html) used for visualization of our dataset
 - [The PASCAL Visual Object Classes Dataset](http://host.robots.ox.ac.uk/pascal/VOC/index.html):
     -  Provides standardised image data sets for object class recognition
     - Provides a common set of tools for accessing the data sets and annotations
@@ -61,6 +62,9 @@ We will CNN image recognition and implement Object Detection using our pre-defin
 - The same goes for our other classes used to train our model.
 
     ![Birthday party](repo_images/007536.png "Birthday party")
+
+- Here is how `fiftyone` visualizes our images and classes.
+
     ![Man with Dog](repo_images/fiftyone_1.png "Man with Dog")
 
 ---

@@ -180,4 +180,4 @@ dependencies:
     - voxel51-eta==0.5.3
     - xmltodict==0.12.0
 # prefix: /opt/conda/envs/Tensorflow
-prefix: /home/dalexander/anaconda3/envs/Tensorflow
+# prefix: /home/dalexander/anaconda3/envs/Tensorflow
