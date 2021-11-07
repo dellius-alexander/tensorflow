@@ -1,3 +1,10 @@
+#@author: Dellius Alexander
+#@Professor: Ken
+#@Date: 11/05/2021
+#@Description: The below is a custom modeling and visualization of CNN Object Detection Model.
+###
+
+
 from json.decoder import JSONDecoder
 from json.encoder import JSONEncoder
 import os, tensorflow_datasets as tfds,\
@@ -56,7 +63,6 @@ def convert_classes_to_bytes(classes, start=1):
     msg = StringIntLabelMap()
     for id, name in enumerate(classes, start=start):
         msg.item.append(StringIntLabelMapItem(id=id, name=name))
-
     text = str(text_format.MessageToBytes(msg, as_utf8=True), 'utf-8')
     return text
 #####################################################################
@@ -91,24 +97,26 @@ def get_dataset_dir(dataset_directory) -> os.path:
     data_path = dataset_directory
     if not os.path.isdir(data_path):
         os.mkdir(data_path)
-        print("----------------- Created Dataset Directory: ")
+        logging.info("----------------- Created Dataset Directory: ")
         data_path = os.path.abspath(data_path)
-        print(data_path)
-        print("--------------------------------------------")
+        logging.info(data_path)
+        logging.info("--------------------------------------------")
         return data_path
     else:
         data_path = os.path.abspath(data_path)
-        print("------------------- Found Dataset Directory: ")
-        print(data_path)
-        print("--------------------------------------------")
+        logging.info("------------------- Found Dataset Directory: ")
+        logging.info(data_path)
+        logging.info("--------------------------------------------")
         return data_path
 #####################################################################
 #####################################################################
-def get_dataset(dataset_directory,batch_size):
+def get_dataset(dataset_name,dataset_directory,batch_size):
     """
     Checks for and creates the dataset directory if it does
     not exist.
+    :param dataset_name: the dataset name, i.e. 'voc'
     :param dataset_directory: the dataset directory
+    :param batch_size: the number of training examples utilized in one iteration.
     :return: tuple[dict | list | tuple | Any, DatasetInfo] | dict | list | tuple | Any
     """
     # Create the dataset directory and download dataset
@@ -116,11 +124,11 @@ def get_dataset(dataset_directory,batch_size):
     ## Create dataset directory if not exist
     if not os.path.isdir(data_path):
         os.mkdir(data_path)
-        print("-------------- Created Dataset Directory: ")
+        logger.info("-------------- Created Dataset Directory: ")
         data_path = os.path.abspath(data_path)
-        # print(data_path)
+        # logging.info(data_path)
         return tfds.load(
-                        'voc',
+                        dataset_name,
                         data_dir=data_path,
                         batch_size=batch_size,
                         shuffle_files=True,
@@ -129,9 +137,10 @@ def get_dataset(dataset_directory,batch_size):
                         with_info=True,
                         )
     else:
-        # print(data_path)
+        logger.info("-------------- Dataset Directory Exists: ")
+        # logging.info(data_path)
         return tfds.load(
-                        'voc',
+                        dataset_name,
                         data_dir=data_path,
                         batch_size=batch_size,
                         shuffle_files=True,
@@ -162,7 +171,7 @@ def get_dataset_info_as_json(info=DatasetInfo) -> str:
         'citation': info.citation
     }
     info_json = json.dumps(info_json,check_circular=True,indent=4,separators=(',',':'))
-    # print(info_json)
+    # logging.info(info_json)
     logger.info("Writing info json to file: DatasetInfo.json")
     logger.info(info_json)
     open("DatasetInfo.json","wb").write(bytes(info_json,"utf-8"))
@@ -301,7 +310,7 @@ BIG_DATA['system info'] = getSystemInfo()
 # Get the dataset
 ## Define regex for the platform OS
 plat = re.compile('({0})'.format(BIG_DATA['system info']['platform']),re.IGNORECASE)
-print("--------------------------------------------")
+logging.info("--------------------------------------------")
 # path separator
 ps =""
 if plat.match("Linux"):
@@ -314,7 +323,7 @@ if plat.match("Window"):
 # name a dataset directory
 BIG_DATA['dataset dir name'] = "Tensorflow_datasets"
 # create dataset of batch size 32/64/128/
-BIG_DATA['dataset'], BIG_DATA['dataset info'] = get_dataset(BIG_DATA['dataset dir name'],32)
+BIG_DATA['dataset'], BIG_DATA['dataset info'] = get_dataset('voc',BIG_DATA['dataset dir name'],32)
 # get the newly creaed dataset directory path
 BIG_DATA['dataset dir'] = BIG_DATA['dataset info'].data_dir
 # create json file of the dataset info and [optionally print info]
@@ -330,11 +339,12 @@ BIG_DATA['output data path'] = "Tensorflow_datasets/data"
 BIG_DATA['label map path'] = "Tensorflow_datasets/data/label_map.pbtxt"
 BIG_DATA['label raw path'] = "Tensorflow_datasets/voc/2007/4.0.0/objects-label.labels.txt"
 BIG_DATA['features'] = get_dataset_features(BIG_DATA['features path'])
-(BIG_DATA['seralized labels'],BIG_DATA['class label list']) = get_labels_contents_from_file(BIG_DATA['label raw path'],\
+(BIG_DATA['seralized labels'],BIG_DATA['class label list']) = \
+    get_labels_contents_from_file(BIG_DATA['label raw path'],\
     BIG_DATA['label map path'])
 #####################################################################
-# print(BIG_DATA['dataset info'])
-print(BIG_DATA['class label list'])
+# logging.info(BIG_DATA['dataset info'])
+logging.info(BIG_DATA['class label list'])
 # now create the Tensorflow Record from out raw data
 my_create_pascal_dataset_records(BIG_DATA)
 # then get the Tensorflow Records data and convert to 

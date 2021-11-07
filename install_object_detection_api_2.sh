@@ -1,7 +1,7 @@
 #!/usr/bin/env bash
 #####################################################################
 # This script install the OBJECT DETECTION API on top of Tensorflow
-## Prerequisite: you may need to install additional dependencies such as:
+## Prerequisite:[apt packages optional for linux environments] you may need to install additional dependencies such as:
 # apt-get update -y && apt-get install -y \
 # git \
 # gpg-agent \
