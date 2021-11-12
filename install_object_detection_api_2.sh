@@ -2,17 +2,17 @@
 #####################################################################
 # This script install the OBJECT DETECTION API on top of Tensorflow
 ## Prerequisite:[apt packages optional for linux environments] you may need to install additional dependencies such as:
-# apt-get update -y && apt-get install -y \
-# git \
-# gpg-agent \
-# python3-cairocffi \
-# protobuf-compiler \
-# python3-pil \
-# python3-lxml \
-# python3-tk \
-# wget \
-# gcc \
-# build-essentials
+apt-get update -y && apt-get install -y \
+git \
+gpg-agent \
+python3-cairocffi \
+protobuf-compiler \
+python3-pil \
+python3-lxml \
+python3-tk \
+wget \
+gcc \
+build-essential
 #####################################################################
 ### USAGE: bash install_object_detection_api_2.sh [PARAM 1] [PARAM 1]\
 ######  
@@ -25,10 +25,11 @@
 # git clone https://github.com/tensorflow/models.git models_dir/
 # Perspective of execution:=> From the root of the git repository ["models/"]
 #### Type the Name of your Models Repo Directory
-set -e  # Start execution from an isolated clean environment using "set -e".
+# Start execution from an isolated clean environment using "set -e".
+set -e 
 MODELS_DIR_NAME=${1:-"Models"} # file discriptor $1
 FLAVOR=${2:-"bionic"}  # file discriptor $2
-MODELS_DIR=$(find ~- -type d -name "${MODELS_DIR_NAME}")
+MODELS_DIR=$(find . -type d -name "${MODELS_DIR_NAME}")
 RESEARCH_DIR=${MODELS_DIR}/research
 JSON_PARAM=("""
 {\n
@@ -47,7 +48,7 @@ if [ ! -d "${MODELS_DIR}" ]  && [ ! -h "${MODELS_DIR}" ]; then
     # clone the Models Repo
     git clone https://github.com/tensorflow/models.git  ${PWD}/${MODELS_DIR_NAME}/
     # Define some environment variables
-    MODELS_DIR=$(find ~- -type d -name "${MODELS_DIR_NAME}")
+    MODELS_DIR=$(find . -type d -name "${MODELS_DIR_NAME}")
     RESEARCH_DIR=${MODELS_DIR}/research
 fi;
 printf "${JSON_PARAM}"

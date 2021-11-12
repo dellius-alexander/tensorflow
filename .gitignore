@@ -14,3 +14,5 @@ Models/
 object_d/
 old/
 *.log
+*.mp4
+media/

@@ -215,7 +215,7 @@ def my_create_pascal_dataset_records(big_data=dict):
     #####################################################################
     #####################################################################
     # capture return variable; it should be 0 if all went well...
-    rtn = os.system('''python3 Models/research/object_detection/dataset_tools/create_pascal_tf_record.py \
+    rtn = os.system('''python3 create_pascal_tf_record.py \
             --data_dir={0} \
             --year={1} \
             --set={2} \
@@ -240,7 +240,7 @@ def my_create_pascal_dataset_records(big_data=dict):
         exit(0)
     else:
         logger.info("\nSuccess building training model...%s\n",rtn)
-    rtn = os.system('''python3 Models/research/object_detection/dataset_tools/create_pascal_tf_record.py \
+    rtn = os.system('''python3 create_pascal_tf_record.py \
             --data_dir={0} \
             --year={1} \
             --set={2} \
