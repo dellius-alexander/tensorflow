@@ -24,6 +24,7 @@ from google.protobuf import text_format
 import tensorflow_datasets as tfds
 import tensorflow as tf
 import fiftyone as fo
+from fiftyone.utils import data, tf as fotf
 #####################################################################
 #####################################################################
 #####################################################################
@@ -132,7 +133,7 @@ def get_dataset(dataset_name,dataset_directory,batch_size):
                         shuffle_files=True,
                         download=True,
                         split=["train","validation","test"],
-                        with_info=True,
+                        with_info=True
                         )
     else:
         logger.info("-------------- Dataset Directory Exists: ")
@@ -205,7 +206,7 @@ def my_create_pascal_dataset_records(big_data=dict):
         python object_detection/dataset_tools/create_pascal_tf_record.py
             --label_map_path=/home/user/VOCdevkit/label_map*
             --data_dir=/home/user/VOCdevkit
-            --year=VOC2012
+            --year="VOC2012"
             --set=["train","test"]
             --output_path=/home/user/pascal.record
             --category=["cat","dog"]
@@ -215,7 +216,7 @@ def my_create_pascal_dataset_records(big_data=dict):
     #####################################################################
     #####################################################################
     # capture return variable; it should be 0 if all went well...
-    rtn = os.system('''python3 create_pascal_tf_record.py \
+    rtn = os.system('''python {6} \
             --data_dir={0} \
             --year={1} \
             --set={2} \
@@ -234,13 +235,15 @@ def my_create_pascal_dataset_records(big_data=dict):
             #   --category=["cat","dog"]
             big_data['class label list'],
             #   --label_map_path=/home/user/voc_opath/label_map.pbtxt*
-            big_data['label map path']
+            big_data['label map path'],
+            #   create tensorflow record
+            big_data['create_pascal_tf_record']
         ))
     if rtn != 0:
         exit(0)
     else:
-        logger.info("\nSuccess building training model...%s\n",rtn)
-    rtn = os.system('''python3 create_pascal_tf_record.py \
+        logger.info("\nSuccess building training model...\nReturn code: %s\n",rtn)
+    rtn = os.system('''python3 {6} \
             --data_dir={0} \
             --year={1} \
             --set={2} \
@@ -259,12 +262,14 @@ def my_create_pascal_dataset_records(big_data=dict):
             #   --category=["cat","dog"]
             big_data['class label list'],
             #   --label_map_path=/home/user/voc_opath/label_map.pbtxt*
-            big_data['label map path']
+            big_data['label map path'],
+            #   create tensorflow record
+            big_data['create_pascal_tf_record']
         ))
     if rtn != 0:
         exit(0)
     else:
-        logger.info("\nSuccess building testing model...%s\n",rtn)
+        logger.info("\nSuccess building testing model...\nReturn code: %s\n",rtn)
 #####################################################################
 #####################################################################
 def get_labels_contents_from_file(labels_raw_path,label_map_path):
@@ -318,18 +323,10 @@ if plat.match("Window"):
     BIG_DATA['path separator']="\\"
     print('''\n\'Platform\': \'{0}\'\n'''.format(BIG_DATA['system info']['platform']))
 #####################################################################
+# name of the dataset
+BIG_DATA['dataset name'] = "voc"
 # name a dataset directory
-BIG_DATA['dataset dir name'] = "Tensorflow_datasets"
-# create dataset of batch size 32/64/128/
-BIG_DATA['dataset'], BIG_DATA['dataset info'] = get_dataset('voc',BIG_DATA['dataset dir name'],32)
-# get the newly creaed dataset directory path
-BIG_DATA['dataset dir'] = BIG_DATA['dataset info'].data_dir
-# create json file of the dataset info and [optionally print info]
-logger.info(get_dataset_info_as_json(BIG_DATA['dataset info']))
-# train_dir = "Tensorflow_datasets/downloads/extracted/VOC2007_train"
-# test_dir = "Tensorflow_datasets/downloads/extracted/VOC2007_test"
-# train_annot_dir = train_dir+"/VOCdevkit/VOC2007/Annotations"
-# train_image_dir = train_dir+"/VOCdevkit/VOC2007/JPEGImages"
+BIG_DATA['dataset dir name'] = os.path.abspath("Tensorflow_datasets")
 BIG_DATA['train data dir'] = "Tensorflow_datasets/downloads/extracted/VOC2007_train/VOCdevkit"
 BIG_DATA['test data dir'] = "Tensorflow_datasets/downloads/extracted/VOC2007_test/VOCdevkit"
 BIG_DATA['features path'] = "Tensorflow_datasets/voc/2007/4.0.0/features.json"
@@ -337,9 +334,17 @@ BIG_DATA['output data path'] = "Tensorflow_datasets/data"
 BIG_DATA['label map path'] = "Tensorflow_datasets/data/label_map.pbtxt"
 BIG_DATA['label raw path'] = "Tensorflow_datasets/voc/2007/4.0.0/objects-label.labels.txt"
 BIG_DATA['features'] = get_dataset_features(BIG_DATA['features path'])
-(BIG_DATA['seralized labels'],BIG_DATA['class label list']) = \
-    get_labels_contents_from_file(BIG_DATA['label raw path'],\
-    BIG_DATA['label map path'])
+BIG_DATA['seralized labels'],BIG_DATA['class label list'] = get_labels_contents_from_file(
+    BIG_DATA['label raw path'],BIG_DATA['label map path'])
+BIG_DATA['create_pascal_tf_record'] = os.path.abspath("create_pascal_tf_record.py")
+BIG_DATA['tf_record_creation_util'] = os.path.abspath("tf_record_creation_util.py")
+BIG_DATA['fiftyone dir'] = os.path.abspath("fiftyone")
+# create dataset of batch size 32/64/128/
+BIG_DATA['dataset'], BIG_DATA['dataset info'] = get_dataset(BIG_DATA['dataset name'],BIG_DATA['dataset dir name'],32)
+# get the newly creaed dataset directory path
+BIG_DATA['dataset dir'] = BIG_DATA['dataset info'].data_dir
+# create json file of the dataset info and [optionally print info]
+logger.info(get_dataset_info_as_json(BIG_DATA['dataset info']))
 #####################################################################
 # logging.info(BIG_DATA['dataset info'])
 logging.info(BIG_DATA['class label list'])
@@ -348,15 +353,71 @@ my_create_pascal_dataset_records(BIG_DATA)
 # then get the Tensorflow Records data and convert to 
 # fiftyone.Dataset of type Tensorflow Object Detection Dataset
 ### https://voxel51.com/docs/fiftyone/user_guide/using_datasets.html#datasets
+#####################################################################
+# Adds the contents of the given archive to the dataset.
+# If a directory with the same root name as archive_path exists, 
+# it is assumed that this directory contains the extracted contents 
+# of the archive, and thus the archive is not re-extracted. 
+# See this guide <loading-datasets-from-disk> for example usages 
+# of this method and descriptions of the available dataset types.
+# 
+# Args:
 dataset1 = fo.Dataset("voc2007").add_archive(
     # archive_path: the path to an archive of a dataset directory
-    archive_path="Tensorflow_datasets/data",
+    archive_path=BIG_DATA['output data path'],
     # dataset_type (None): the fiftyone.types.dataset_types.Dataset type of the 
     # dataset in archive_path. Since we converted it using the object detection 
     # API to a TFRecord, we need to use the dataType "TFObjectDetectionDataset"
-    # See:  https://voxel51.com/docs/fiftyone/api/fiftyone.types.dataset_types.html?\
-    #       highlight=dataset_type#module-fiftyone.types.dataset_types
-    dataset_type=fo.types.dataset_types.TFObjectDetectionDataset
+    # See:  https://voxel51.com/docs/fiftyone/api/fiftyone.types.dataset_types.html?\highlight=dataset_type#module-fiftyone.types.dataset_types
+    dataset_type=fo.types.dataset_types.TFObjectDetectionDataset,
+    # dataset_type=fo.types.dataset_types.TFImageClassificationDataset,
+    # data_path (None): an optional parameter that enables explicit
+    #   control over the location of the exported media for certain dataset 
+    #   types. Can be any of the following:
+    #       - a folder name like `"data"` or `"data/"` specifying a
+    #       subfolder of dataset_dir in which the media lies - an absolute 
+    #       directory path in which the media lies. In this case, the archive_path 
+    #       has no effect on the location of the data - a filename like "data.json" 
+    #       specifying the filename of a JSON manifest file in archive_path that maps 
+    #       UUIDs to media filepaths. Files of this format are generated when passing 
+    #       the export_media="manifest" option to fiftyone.core.collections.SampleCollection.export 
+    #       - an absolute filepath to a JSON manifest file. In this case, archive_path has no 
+    #       effect on the location of the data
+    #       By default, it is assumed that the data can be located in the default 
+    #       location within archive_path for the dataset type
+    # data_path=BIG_DATA['fiftyone dir'],
+    # labels_path (None): an optional parameter that enables explicit
+    #       control over the location of the labels. Only applicable when importing 
+    #       certain labeled dataset formats. Can be any of the following:
+    #       - a type-specific folder name like `"labels"` or
+    #       "labels/" or a filename like "labels.json" or "labels.xml" specifying 
+    #       the location in archive_path of the labels file(s) - an absolute directory 
+    #       or filepath containing the labels file(s). In this case, archive_path has 
+    #       no effect on the location of the labels
+    #       For labeled datasets, this parameter defaults to the location in archive_path 
+    #       of the labels for the default layout of the dataset type being imported
+    # labels_path=BIG_DATA['output data path'],
+    # label_field (None): controls the field(s) in which imported labels
+    #       are stored. Only applicable if dataset_importer is a 
+    #       fiftyone.utils.data.importers.LabeledImageDatasetImporter or 
+    #       fiftyone.utils.data.importers.LabeledVideoDatasetImporter. If the importer 
+    #       produces a single fiftyone.core.labels.Label instance per sample/frame, this 
+    #       argument specifies the name of the field to use; the default is "ground_truth".
+    #       If the importer produces a dictionary of labels per sample, this argument specifies 
+    #       a string prefix to prepend to each label key; the default in this case is to directly 
+    #       use the keys of the imported label dictionaries as field names
+    # tags (None): an optional tag or iterable of tags to attach to each
+    #       sample
+    # expand_schema (True): whether to dynamically add new sample fields
+    #       encountered to the dataset schema. If False, an error is raised if a 
+    #       sample's schema is not a subset of the dataset schema
+    # add_info (True): whether to add dataset info from the importer (if
+    #       any) to the dataset's info
+    # image_dir (None): this parameter customize the path to ~/Tensorflow/fiftyone/
+    # cleanup (True): whether to delete the archive after extracting it
+    # **kwargs: optional keyword arguments to pass to the constructor of
+    # the fiftyone.utils.data.importers.DatasetImporter for the specified dataset_type
+    
 )
 # verify the dataset bytes
 # logger.info(dataset1)
@@ -367,5 +428,5 @@ dataset2 = fo.load_dataset("voc2007")
 logger.info("\nCompleted Loading Dataset...\n")
 # now visualize the data and see the class mapping 
 # with boxes
-session = fo.launch_app(dataset2,port=5151)
+session = fo.launch_app(dataset2,address='127.0.0.1',port=5151)
 session.wait()

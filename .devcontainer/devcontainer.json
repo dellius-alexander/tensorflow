@@ -40,10 +40,16 @@
 		"docsmsft.docs-markdown",
 		"ms-toolsai.jupyter",
 		"ms-toolsai.jupyter-keymap",
+		"ms-toolsai.jupyter-renderers",
 		"changkaiyan.tf2snippets",
 		"visualstudioexptteam.vscodeintellicode",
 		"donjayamanne.python-extension-pack",
-		"ms-python.vscode-pylance"
+		"ms-python.vscode-pylance",
+		"tomoki1207.pdf",
+		"batisteo.vscode-django",
+		"wholroyd.jinja",
+		"njpwerner.autodocstring",
+		"donjayamanne.python-environment-manager",
 	],
 	// Workspace folder in container
 	"workspaceFolder": "/home/tensorflow/Tensorflow/",
