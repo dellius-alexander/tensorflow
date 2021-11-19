@@ -1,5 +1,5 @@
 # See here for image contents: https://github.com/microsoft/vscode-dev-containers/tree/v0.202.5/containers/python-3-anaconda/.devcontainer/base.Dockerfile
-ARG TFVERSION=2.6.1
+ARG TFVERSION="2.7.0"
 FROM tensorflow/tensorflow:${TFVERSION}-gpu as setup_gcsdk
 
 ARG NODE_VERSION="true"
@@ -103,15 +103,19 @@ RUN cd /home/tensorflow/models/research && \
     --python_out=.
 # copy setup.py to models/research
 RUN cp /home/tensorflow/models/research/object_detection/packages/tf2/setup.py /home/tensorflow/models/research
-RUN ls -lia /home/tensorflow/models/research
+RUN ls -lia /home/tensorflow/models
 RUN source "/home/tensorflow/anaconda3/etc/profile.d/conda.sh" && \
     conda activate /home/tensorflow/anaconda3/envs/Tensorflow && \
     cd /home/tensorflow/models/research && \
-    python3 -m pip install  /home/tensorflow/models/research
+    python3 -m pip install  /home/tensorflow/models/research && \
+    python3 -m pip install --upgrade object-detection tensorflow tensorflow-text tensorflow-io 
+
+    # python3 -m pip install --upgrade tensorflow tensorflow-text tensorflow-io object-detection
 # Clean up
 RUN apt-get autoremove -y \
     && apt-get clean -y \
     && rm -rf /var/lib/apt/lists/*  /tmp/library-scripts/ /tmp/conda-tmp/ /home/tensorflow/models
 
 # ENTRYPOINT ["python", "object_detection/model_main_tf2.py"]
-ENTRYPOINT [ "conda", "activate", "Tensorflow" ]
+# ENTRYPOINT [ "conda", "activate", "Tensorflow" ]
+CMD [ "conda", "activate", "Tensorflow" ]

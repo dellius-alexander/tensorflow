@@ -1,3 +1,6 @@
+# CREATE ENV FILE: conda env export > environment.yml
+# CREATE FROM ENV FILE: conda create -f environment.yml python=3.8 --prefix=/opt/conda/envs/Tensorflow
+# REFERENCES: https://conda.io/projects/conda/en/latest/user-guide/tasks/manage-environments.html#create-env-file-manually
 name: Tensorflow
 channels:
   - defaults
@@ -22,17 +25,16 @@ dependencies:
   - cffi=1.14.6=py38h400218f_0
   - chardet=4.0.0=py38h06a4308_1003
   - charset-normalizer=2.0.4=pyhd3eb1b0_0
-  - click=8.0.1=pyhd3eb1b0_0
+  - click=8.0.3=pyhd3eb1b0_0
   - coverage=5.5=py38h27cfd23_2
   - cryptography=3.4.8=py38hd23ed53_0
-  - cython=0.29.24=py38h295c915_0
+  - cython=0.29.24=py38hdbfa776_0
   - dataclasses=0.8=pyh6d0b6a4_7
   - gast=0.4.0=pyhd3eb1b0_0
   - giflib=5.2.1=h7b6447c_0
   - google-auth=1.33.0=pyhd3eb1b0_0
   - google-auth-oauthlib=0.4.1=py_2
   - google-pasta=0.2.0=pyhd3eb1b0_0
-  - h5py=3.2.1=py38h6c542dc_0
   - hdf5=1.10.6=hb1b8bf9_0
   - icu=68.1=h2531618_0
   - idna=3.2=pyhd3eb1b0_0
@@ -80,19 +82,14 @@ dependencies:
   - rsa=4.7.2=pyhd3eb1b0_1
   - scipy=1.7.1=py38h292c36d_2
   - setuptools=58.0.4=py38h06a4308_0
-  - six=1.16.0=pyhd3eb1b0_0
   - snappy=1.1.8=he6710b0_0
   - sqlite=3.36.0=hc218d9a_0
   - tensorboard=2.6.0=py_1
   - tensorboard-data-server=0.6.0=py38hca6d32c_0
   - tensorboard-plugin-wit=1.6.0=py_0
-  - tensorflow=2.6.0=mkl_py38h874c8e8_0
-  - tensorflow-base=2.6.0=mkl_py38h3d85931_0
   - tensorflow-estimator=2.6.0=pyh7b7c402_0
   - termcolor=1.1.0=py38h06a4308_1
   - tk=8.6.11=h1ccaba5_0
-  - typing-extensions=3.10.0.2=hd3eb1b0_0
-  - typing_extensions=3.10.0.2=pyh06a4308_0
   - urllib3=1.26.7=pyhd3eb1b0_0
   - werkzeug=2.0.1=pyhd3eb1b0_0
   - wheel=0.35.1=pyhd3eb1b0_0
@@ -143,6 +140,7 @@ dependencies:
     - greenlet==1.1.2
     - grpcio==1.41.1
     - h11==0.12.0
+    - h5py==3.1.0
     - hdfs==2.6.0
     - httpcore==0.13.7
     - httplib2==0.19.1
@@ -183,7 +181,7 @@ dependencies:
     - nest-asyncio==1.5.1
     - networkx==2.6.3
     - notebook==6.4.5
-    - numpy==1.20.3
+    - numpy==1.19.5
     - oauth2client==4.1.3
     - object-detection==0.1
     - opencv-python==4.5.4.58
@@ -232,9 +230,11 @@ dependencies:
     - send2trash==1.8.0
     - sentencepiece==0.1.96
     - seqeval==1.2.2
+    - six==1.15.0
     - sniffio==1.2.0
     - sortedcontainers==2.4.0
     - tabulate==0.8.9
+    - tensorflow==2.6.2
     - tensorflow-addons==0.14.0
     - tensorflow-datasets==4.4.0
     - tensorflow-hub==0.12.0
@@ -254,6 +254,7 @@ dependencies:
     - tqdm==4.62.3
     - traitlets==5.1.1
     - typeguard==2.13.0
+    - typing-extensions==3.7.4.3
     - tzdata==2021.5
     - tzlocal==4.0.1
     - universal-analytics-python3==1.1.1
@@ -263,4 +264,4 @@ dependencies:
     - webencodings==0.5.1
     - widgetsnbextension==3.5.2
     - xmltodict==0.12.0
-prefix: /home/dalexander/anaconda3/envs/Tensorflow
+# prefix: /home/tensorflow/anaconda3/envs/Tensorflow

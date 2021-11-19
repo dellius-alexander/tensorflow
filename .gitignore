@@ -10,7 +10,7 @@ Tensorflow_datasets/*
 data/
 core
 notes.txt
-Models/
+models/
 object_d/
 old/
 *.log

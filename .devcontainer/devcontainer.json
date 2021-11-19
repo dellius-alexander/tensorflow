@@ -7,7 +7,7 @@
 		// "context": "Tensorflow/.devcontainer/",
 		"dockerfile": "base.Dockerfile",
 		"args": {
-			"TFVERSION": "2.6.1",
+			"TFVERSION": "2.7.0",
 			"NODE_VERSION": "lts/*",
 			"INSTALL_ZSH": "true",
 			"USERNAME": "tensorflow",
