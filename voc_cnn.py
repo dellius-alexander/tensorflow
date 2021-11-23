@@ -3,6 +3,7 @@
 #@Date: 11/05/2021
 #@Description: The below is a custom modeling and visualization of CNN Object Detection Model.
 ##########################################################################
+from json import encoder
 from json.decoder import JSONDecoder
 from json.encoder import JSONEncoder
 import os, tensorflow_datasets as tfds,\
@@ -55,20 +56,25 @@ logger.warning('This message is a test for log level...WARNING')
 logger.error('This message is a test for log level...ERROR')
 #####################################################################
 #####################################################################
-def convert_classes_to_bytes(classes, start=1):
+def convert_classes_to_bytes(classes, start=1, encoding='utf-8'):
     """
     Converting python list to label_map.pbtxt
+    ;param classes; your list of classes or category
+    ;param start; start index
+    :return list[str(text_format.MessageToBytes(msg, as_utf8=True), 'utf-8')]
     """
     msg = StringIntLabelMap()
     for id, name in enumerate(classes, start=start):
         msg.item.append(StringIntLabelMapItem(id=id, name=name))
-    text = str(text_format.MessageToBytes(msg, as_utf8=True), 'utf-8')
+    text = str(text_format.MessageToBytes(msg, as_utf8=True), encoding)
     return text
 #####################################################################
 #####################################################################
 #Shamelessly combined from google and other stackoverflow like 
 # sites to form a single function
 def getSystemInfo():
+    '''Gets the current system|machine information
+    :return dict[]'''
     try:
         info={}
         info['platform']=platform.system()
@@ -297,8 +303,63 @@ def get_labels_contents_from_file(labels_raw_path,label_map_path):
     return (labels_serialized_to_bytes, class_label_list)
 #####################################################################
 #####################################################################
+def check_dir(directory):
+    '''Checks if the directory exist; creates the directory if it \
+        if it does not exist.
+    :param directory: [os.path] - the directory to be verified
+    '''
+    cnt = 0
+    contents = {}
+    if os.path.exists(directory):
+        contents[directory] = {}
+        for root, dirs, files in os.walk(
+            top=os.path.relpath(directory),
+            topdown=False
+            ):
+            dir_path = ""
+            if len(dirs) > 1:
+                cnt+=1
+                for _dir in dirs:
+                    dir_path = os.path.join(root,_dir)
+                    print(dir_path)
+                    contents[directory][_dir] = []
+                    for file in files:
+                        contents[directory][_dir].append(file)
+                    check_dir(dir_path)
+            elif len(dirs) == 1:
+                print (root)
+                print (dirs)
+                print (files)
+                print ('--------------------------------')
+                cnt+=1
+            if cnt == 3:
+                print(contents)
+                return contents
+
+            # if len(dirs) > 1:
+            #     for dir_ in dirs:
+            #         contents[str(directory)][str(dir_)] = {}
+                # logger.info(contents)
+                    # return check_dir(os.path.join(root,dir_))
+            # if len(dirs) == 1:
+            #     contents[directory][dirs[0]] = []
+            #     for dir in dirs:
+            #         if len(files) > 0:
+            #             for file in files:
+            #                 contents[directory][dir].append(file)
+            #             logger.info(contents[directory][dir])
+            #             return contents[directory][dir]
+        print(contents)
+        return contents
+    elif not os.path.exists(directory):
+        os.mkdir(directory)
+        return os.path.abspath(directory)
+#####################################################################
+#####################################################################
 def main():
     BIG_DATA={}
+    check_dir('Tensorflow_datasets')
+    exit(0)
     #####################################################################
     #####################################################################
     # get the system info
@@ -321,6 +382,10 @@ def main():
     BIG_DATA['dataset name'] = "voc"
     # name a dataset directory
     BIG_DATA['dataset dir name'] = os.path.abspath("Tensorflow_datasets")
+    
+    # create dataset of batch size 32/64/128/
+    BIG_DATA['dataset'], BIG_DATA['dataset info'] = get_dataset(BIG_DATA['dataset name'],BIG_DATA['dataset dir name'],32)
+    # define the rest of the objects
     BIG_DATA['train data dir'] = "Tensorflow_datasets/downloads/extracted/VOC2007_train/VOCdevkit"
     BIG_DATA['test data dir'] = "Tensorflow_datasets/downloads/extracted/VOC2007_test/VOCdevkit"
     BIG_DATA['features path'] = "Tensorflow_datasets/voc/2007/4.0.0/features.json"
@@ -333,8 +398,7 @@ def main():
     BIG_DATA['create_pascal_tf_record'] = os.path.abspath("create_pascal_tf_record.py")
     BIG_DATA['tf_record_creation_util'] = os.path.abspath("tf_record_creation_util.py")
     BIG_DATA['fiftyone dir'] = os.path.abspath("fiftyone")
-    # create dataset of batch size 32/64/128/
-    BIG_DATA['dataset'], BIG_DATA['dataset info'] = get_dataset(BIG_DATA['dataset name'],BIG_DATA['dataset dir name'],32)
+    
     # get the newly creaed dataset directory path
     BIG_DATA['dataset dir'] = BIG_DATA['dataset info'].data_dir
     # create json file of the dataset info and [optionally print info]

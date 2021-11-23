@@ -2,7 +2,9 @@
 // https://github.com/microsoft/vscode-dev-containers/tree/v0.202.5/containers/python-3-anaconda
 {
 	"name": "Tensorflow (Anaconda3)",
-	"runArgs": ["--init", "--privileged","--gpus=all"],
+	// "runArgs": ["--init", "--privileged","--gpus=all"],
+	"runArgs": ["--init", "--privileged"],
+
 	"build": {
 		// "context": "Tensorflow/.devcontainer/",
 		"dockerfile": "base.Dockerfile",
@@ -10,27 +12,28 @@
 			"TFVERSION": "2.7.0",
 			"NODE_VERSION": "lts/*",
 			"INSTALL_ZSH": "true",
-			"USERNAME": "tensorflow",
+			"USERNAME": "Tensorflow",
 			"USER_UID": "1000",
 			"PYTHONVERSION": "3.8",
-			"WORK_DIR": "/home/tensorflow/Tensorflow",
-			"CONDA_HOME": "/home/tensorflow/anaconda3"
+			"WORK_DIR": "/home/Tensorflow/Tensorflow",
+			"CONDA_HOME": "/home/Tensorflow/anaconda3"
 		}
 	},
 
 	// Set *default* container specific settings.json values on container create.
 	"settings": { 
-		"python.pythonPath": "/home/tensorflow/anaconda3/envs/Tensorflow/bin/python3",
-		"python.condaPath": "/home/tensorflow/anaconda3/condabin/",
+		"python.pythonPath": "/home/Tensorflow/anaconda3/envs/Tensorflow/bin/python3.8",
+		"python.defaultInterpreterPath": "/home/Tensorflow/anaconda3/envs/Tensorflow/bin/python3.8",
+		"python.condaPath": "/home/Tensorflow/anaconda3/condabin/",
 		"python.languageServer": "Pylance",
 		"python.linting.enabled": true,
 		"python.linting.pylintEnabled": true,
-		"python.formatting.autopep8Path": "/home/tensorflow/anaconda3/bin/autopep8",
-		"python.formatting.yapfPath": "/home/tensorflow/anaconda3/bin/yapf",
-		"python.linting.flake8Path": "/home/tensorflow/anaconda3/bin/flake8",
-		"python.linting.pycodestylePath": "/home/tensorflow/anaconda3/bin/pycodestyle",
-		"python.linting.pydocstylePath": "/home/tensorflow/anaconda3/bin/pydocstyle",
-		"python.linting.pylintPath": "/home/tensorflow/anaconda3/bin/pylint"
+		"python.formatting.autopep8Path": "/home/Tensorflow/anaconda3/bin/autopep8",
+		"python.formatting.yapfPath": "/home/Tensorflow/anaconda3/bin/yapf",
+		"python.linting.flake8Path": "/home/Tensorflow/anaconda3/bin/flake8",
+		"python.linting.pycodestylePath": "/home/Tensorflow/anaconda3/bin/pycodestyle",
+		"python.linting.pydocstylePath": "/home/Tensorflow/anaconda3/bin/pydocstyle",
+		"python.linting.pylintPath": "/home/Tensorflow/anaconda3/bin/pylint"
 	},
 
 	// Add the IDs of extensions you want installed when the container is created.
@@ -52,17 +55,17 @@
 		"donjayamanne.python-environment-manager",
 	],
 	// Workspace folder in container
-	"workspaceFolder": "/home/tensorflow/Tensorflow/",
+	"workspaceFolder": "/home/Tensorflow/Tensorflow/",
 
 	// Local workspace mount
-	"workspaceMount": "source=${localWorkspaceFolder}/,target=/home/tensorflow/Tensorflow/,type=bind,consistency=cached",
+	"workspaceMount": "source=${localWorkspaceFolder}/,target=/home/Tensorflow/Tensorflow/,type=bind,consistency=cached",
 	
 	// Use 'forwardPorts' to make a list of ports inside the container available locally.
 	// "forwardPorts": [],
 
 	// Use 'postCreateCommand' to run commands after the container is created.
-	"postCreateCommand": "python --version && ls -lia /home/tensorflow && /usr/bin/zsh  && conda activate /home/tensorflow/anaconda3/envs/Tensorflow && conda activate /home/tensorflow/anaconda3/envs/Tensorflow",
+	"postCreateCommand": "python --version && ls -lia /home/Tensorflow/Tensorflow && /usr/bin/zsh  && conda activate /home/Tensorflow/anaconda3/envs/Tensorflow",
 
 	// Comment out connect as root instead. More info: https://aka.ms/vscode-remote/containers/non-root.
-	"remoteUser": "tensorflow"
+	"remoteUser": "Tensorflow"
 }

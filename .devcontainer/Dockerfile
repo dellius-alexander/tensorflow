@@ -4,13 +4,14 @@ FROM tensorflow/tensorflow:${TFVERSION}-gpu as setup_gcsdk
 
 ARG NODE_VERSION="true"
 ARG INSTALL_ZSH="true"
-ARG USERNAME="tensorflow"
+ARG USERNAME="Tensorflow"
 ARG USER_UID=1000
 ARG USER_GID=${USER_UID}
 ARG DEBIAN_FRONTEND=noninteractive
 ARG PYTHONVERSION=3.8
-ARG WORK_DIR="/home/tensorflow/Tensorflow"
-ARG CONDA_HOME="/home/tensorflow/anaconda3"
+ARG USER_HOME="/home/${USERNAME}"
+ARG WORK_DIR="/home/${USERNAME}/Tensorflow"
+ARG CONDA_HOME="/home/${USERNAME}/anaconda3"
 
 COPY library-scripts/* /tmp/library-scripts/
 RUN ls -lia /tmp/library-scripts
@@ -18,7 +19,8 @@ RUN ls -lia /tmp/library-scripts
 #         cat "/tmp/library-scripts/common-debian.sh"; else exit 1; fi;
 # # Setup user environment
 RUN apt-get update \
-    && /bin/bash /tmp/library-scripts/common-debian.sh "${INSTALL_ZSH}" "${USERNAME}" "${USER_UID}" "${USER_GID}" "true" "true" "true"
+    && /bin/bash /tmp/library-scripts/common-debian.sh \
+    "${INSTALL_ZSH}" "${USERNAME}" "${USER_UID}" "${USER_GID}" "true" "true" "true"
 
 # Install apt dependencies
 RUN apt-get update && apt-get install -y \
@@ -32,21 +34,27 @@ RUN apt-get update && apt-get install -y \
     python3-opencv \
     zsh \
     wget
-
+USER ${USERNAME}
 # Installs google cloud sdk, this is mostly for using gsutil to export model.
-RUN wget -nv \
-    https://dl.google.com/dl/cloudsdk/release/google-cloud-sdk.tar.gz && \
-    mkdir /root/tools && \
-    tar xvzf google-cloud-sdk.tar.gz -C /root/tools && \
-    rm google-cloud-sdk.tar.gz && \
-    /root/tools/google-cloud-sdk/install.sh --usage-reporting=false \
-        --path-update=false --bash-completion=false \
-        --disable-installation-options && \
-    rm -rf /root/.config/* && \
-    ln -s /root/.config /config && \
-    rm -rf /root/tools/google-cloud-sdk/.install/.backup
+RUN curl -fsSL \
+    https://dl.google.com/dl/cloudsdk/release/google-cloud-sdk.tar.gz \
+    -o /tmp/google-cloud-sdk.tar.gz && \
+    mkdir "${USER_HOME}/tools" && \
+    tar xvzf /tmp/google-cloud-sdk.tar.gz -C "/${USER_HOME}/tools" && \
+    rm /tmp/google-cloud-sdk.tar.gz && \
+    "${USER_HOME}/tools/google-cloud-sdk/install.sh" \
+        --usage-reporting=false \
+        --path-update=false \
+        --bash-completion=false \
+        --disable-installation-options
+RUN    rm -rf "${USER_HOME}/.config/*"
+# RUN ls /
+# RUN    CONFIG=$(ls / | grep -i 'config') &2>/dev/null
+# RUN    if [[ -z ${CONFIG} ]]; then CONFIG=$(ls ${USER_HOME} | grep -i 'config' &2>/dev/null) fi; 
+RUN    ln -s "${USER_HOME}/.config" "${USER_HOME}/config" && \
+    rm -rf "${USER_HOME}/tools/google-cloud-sdk/.install/.backup"
 # Path configuration
-ENV PATH $PATH:/root/tools/google-cloud-sdk/bin
+ENV PATH="$PATH:${USER_HOME}/tools/google-cloud-sdk/bin"
 # Setup anaconda
 FROM setup_gcsdk as setup_conda
 # Install oh-my-zsh
@@ -54,6 +62,7 @@ RUN rm -rf ~/.oh-my-zsh && sh -c "$(curl -fsSL https://raw.github.com/ohmyzsh/oh
 # Copy environment.yml (if found) to a temp location so we update the environment. Also
 # copy "noop.txt" so the COPY instruction does not fail if no environment.yml exists.
 COPY environment.yml* /tmp/conda-tmp/
+USER root
 # Install anaconda into our container USER dev environment
 # Usage:  ./anaconda.sh [[0][-b {LICENSE MOFE flag}]], 
 #                       [[1][-p {PREFIX flag}]], 
@@ -69,45 +78,46 @@ RUN /bin/bash /tmp/library-scripts/anaconda.sh \
     "${USERNAME}" \
     "/tmp/conda-tmp/environment.yml"
 # setup alias for our new python environment
-RUN alias python='/usr/bin/python3.4' && \
-    echo 'alias python="/usr/bin/python3.4"' >> /home/tensorflow/.bashrc && \
-    echo 'alias python="/usr/bin/python3.4"' >> /home/tensorflow/.zshrc
+RUN alias python='/usr/bin/python3.8' && \
+    echo 'alias python="/usr/bin/python3.8"' >> "${USER_HOME}/.bashrc" && \
+    echo 'alias python="/usr/bin/python3.8"' >> "${USER_HOME}/.zshrc"
 # Define our work directory
-WORKDIR /${WORK_DIR}
+WORKDIR ${WORK_DIR}
 # copy a symbolic link of conda to our .local/bin directory
 # RUN ln -s "${CONDAPATH}/conda"  "/home/tensorflow/.local/bin"
 # Export a few changes to path variables and environment variables
-ENV PATH="/home/tensorflow/.local/bin:${CONDAPATH}:${CONDA_HOME}/envs/Tensorflow/bin:${PATH}"
+ENV CONDAPATH="${CONDA_HOME}/condabin/"
+ENV PATH="${USER_HOME}/.local/bin:${CONDAPATH}:${CONDA_HOME}/envs/Tensorflow/bin:${PATH}"
 ENV CONDA_HOME="${CONDA_HOME}"
 ENV PYTHONPATH="${CONDA_HOME}/envs/Tensorflow/bin/python${PYTHONVERSION}" 
-ENV CONDAPATH="${CONDA_HOME}/condabin/"
+
 # Make sure gsutil will use the default service account
 RUN echo '[GoogleCompute]\nservice_account = default' > /etc/boto.cfg
 
 # Setup object detection on top of Tenserflow
 FROM setup_conda
-RUN cd /home/tensorflow  && \
+RUN cd "${USER_HOME}"  && \
     # conda initialize
-    source "/home/tensorflow/anaconda3/etc/profile.d/conda.sh" && \
+    source "${CONDA_HOME}/etc/profile.d/conda.sh" && \
     conda activate Tensorflow
 # Define a work directory
 WORKDIR /home/tensorflow/
 ## Copy this code (make sure you are under the ../models/research directory)
-RUN git clone https://github.com/tensorflow/models.git /home/tensorflow/models && \
-    ls -lia /home/tensorflow/models/research
+RUN git clone https://github.com/tensorflow/models.git "${WORK_DIR}/models" && \
+    ls -lia "${WORK_DIR}/models/research"
 
 RUN python3 -m pip install -U pip
 # Compile protobuf configs
-RUN cd /home/tensorflow/models/research && \
+RUN cd "${WORK_DIR}/models/research" && \
     protoc object_detection/protos/*.proto  \
     --python_out=.
 # copy setup.py to models/research
-RUN cp /home/tensorflow/models/research/object_detection/packages/tf2/setup.py /home/tensorflow/models/research
-RUN ls -lia /home/tensorflow/models
-RUN source "/home/tensorflow/anaconda3/etc/profile.d/conda.sh" && \
-    conda activate /home/tensorflow/anaconda3/envs/Tensorflow && \
-    cd /home/tensorflow/models/research && \
-    python3 -m pip install  /home/tensorflow/models/research && \
+RUN cp "${WORK_DIR}/models/research/object_detection/packages/tf2/setup.py" "${WORK_DIR}/models/research"
+RUN ls -lia "${WORK_DIR}/models"
+RUN source "${CONDA_HOME}/etc/profile.d/conda.sh" && \
+    conda activate "${CONDA_HOME}/envs/Tensorflow" && \
+    cd "${WORK_DIR}/models/research" && \
+    python3 -m pip install  "${WORK_DIR}/models/research" && \
     python3 -m pip install --upgrade object-detection tensorflow tensorflow-text tensorflow-io 
 
     # python3 -m pip install --upgrade tensorflow tensorflow-text tensorflow-io object-detection
